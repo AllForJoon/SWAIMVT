@@ -312,7 +312,7 @@ https://templatemo.com/tm-540-lava-landing-page
     <script src="assets/js/custom.js"></script>
     <!-- Include all js compiled plugins (below), or include individual files as needed -->
 
-		<script src="assets/js/jquery.js"></script>
+		<!-- <script src="assets/js/jquery.js"></script> -->
 
 
 		<!-- 수업중 axios를 사용하기 위해 CDN 추가 -->
@@ -349,7 +349,7 @@ https://templatemo.com/tm-540-lava-landing-page
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
 		     
         <!--Custom JS-->
-        <script src="assets/js/custom.js"></script>
+        <!-- <script src="assets/js/custom.js"></script> -->
 
 		<script type="application/javascript">
 					var ip = "null";
@@ -467,10 +467,10 @@ https://templatemo.com/tm-540-lava-landing-page
 			});
 
 
-			$("#submit").on("click", function () {
+			$("#form-submit").on("click", function () {
 
-			const email = $("#submit-email").val();
-			const advice = $("#submit-advice").val();
+			const email = $("#email").val();
+			const advice = $("#message").val();
 
 			function validateEmail(email) {
 				var re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
@@ -490,7 +490,7 @@ https://templatemo.com/tm-540-lava-landing-page
 
 			$.busyLoadFull("show");
 
-			axios.get('** Apps script 주소 **?action=insert&table=tab_final&data=' + finalData)
+			axios.get('https://planaiys.netlify.app/?action=insert&table=tab_final&data=' + finalData)
 				.then(response => {
 					console.log(response.data.data);
 					$.busyLoadFull("hide");
