@@ -421,7 +421,7 @@ https://templatemo.com/tm-540-lava-landing-page
 				$(document).ready(function () {
 					
 					$.ajax({
-					    url: 'https://script.google.com/macros/s/AKfycbxbreEYs51kOmka-9btzyxsEun2lCDIKOtFmIM6JaKz-MdNEpSdepXol6rBW7gh7fk/exec'+'?action=insert&table=visitors&data='+data,
+					    url: 'https://script.google.com/macros/s/AKfycbzKL5H_XPDc0XmIOHCX2Si5eCiMwCRqejr04oUmQ-G7a2uqQik3qw_mZnsXk-AtSI8/exec'+'?action=insert&table=visitors&data='+data,
 					    dataType: 'jsonp',
 					    success: function (data) {
 						console.log('성공 - ', JSON.stringify(data));
@@ -454,7 +454,7 @@ https://templatemo.com/tm-540-lava-landing-page
 							"advice": advice
 						})
 				
-						axios.get('https://script.google.com/macros/s/AKfycbxbreEYs51kOmka-9btzyxsEun2lCDIKOtFmIM6JaKz-MdNEpSdepXol6rBW7gh7fk/exec?action=insert&table=registration&data=' + finalData)
+						axios.get('https://script.google.com/macros/s/AKfycbzKL5H_XPDc0XmIOHCX2Si5eCiMwCRqejr04oUmQ-G7a2uqQik3qw_mZnsXk-AtSI8/exec?action=insert&table=registration&data=' + finalData)
 							.then(response => {
 							$.busyLoadFull("hide");
 							$.fn.simplePopup({ type: "html", htmlSelector: "#popup" });
