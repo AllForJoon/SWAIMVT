@@ -95,6 +95,36 @@ https://templatemo.com/tm-540-lava-landing-page
     </div>
     <!-- ***** Welcome Area End ***** -->
 
+
+        <!-- ***** Welcome Area End ***** -->
+
+    <!-- AI 플래너 체험하기 버튼 -->
+    <div style="text-align:center; margin: 40px 0;">
+        <button id="ai-planner-btn" class="main-button">AI 플래너 체험하기</button>
+    </div>
+
+    <!-- AI Planner Modal -->
+    <div class="modal fade" id="aiPlannerModal" tabindex="-1" role="dialog" aria-labelledby="aiPlannerModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document" style="max-width:600px;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="aiPlannerModalLabel">AI 플래너 체험</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button> 
+          </div>
+          <div class="modal-body">
+            <div id="chat-area" style="height:400px; overflow-y:auto; padding:10px; border:1px solid #eee; border-radius:5px;">
+              <!-- 대화 내용이 여기 추가됩니다 -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ***** Features Big Item Start ***** -->
+
+
     <!-- ***** Features Big Item Start ***** -->
     <section class="section" id="about">
         <div class="container">
@@ -312,6 +342,166 @@ https://templatemo.com/tm-540-lava-landing-page
     <script src="assets/js/custom.js"></script>
 
     <!-- Scripts -->
+
+    <script>
+        $(document).ready(function(){
+            let step = 0;
+            let jobType = "";
+            let schedule = "";
+            let prepTime = "";
+            let afterTime = "";
+        
+            $("#ai-planner-btn").on("click", function(){
+                $("#aiPlannerModal").modal('show');
+                startChat();
+            });
+        
+            function startChat(){
+                step = 1;
+                $("#chat-area").empty();
+                appendChatMessage("bot", "당신의 직업은 무엇입니까?");
+                appendOptions(["학생", "직장인"], function(selected){
+                    jobType = selected;
+                    appendChatMessage("user", selected);
+                    step = 2;
+                    appendChatMessage("bot", "회사/학교 일정을 알려주세요.");
+                    appendOptions(["08:00~17:00", "09:00~18:00", "10:00~19:00"], function(timeSelected){
+                        schedule = timeSelected;
+                        appendChatMessage("user", timeSelected);
+                        step = 3;
+                        appendChatMessage("bot", "준비 및 출근/등교에 걸리는 시간이 어떻게 되나요?");
+                        appendOptions(["30분", "1시간", "1시간 30분"], function(prepSelected){
+                            prepTime = prepSelected;
+                            appendChatMessage("user", prepSelected);
+                            step = 4;
+                            appendChatMessage("bot", "퇴근/하교 후 집에 도착까지 얼마나 걸리나요?");
+                            appendOptions(["30분", "1시간", "1시간 30분"], function(afterSelected){
+                                afterTime = afterSelected;
+                                appendChatMessage("user", afterSelected);
+                                step = 5;
+                                showPlan(schedule, prepTime, afterTime);
+                            });
+                        });
+                    });
+                });
+            }
+        
+            function appendChatMessage(sender, text){
+                // sender가 "bot"이면 bot용 클래스, user면 user용 클래스
+                const messageClass = (sender === "bot") ? "chat-message-bot" : "chat-message-user";
+                const msg = `<div class="${messageClass}">${text}</div>`;
+                $("#chat-area").append(msg);
+                scrollChatToBottom();
+            }
+
+            function appendOptions(options, callback){
+                let btnGroup = $('<div class="chat-options"></div>');
+                options.forEach(function(opt){
+                    let btn = $('<button></button>').text(opt);
+                    btn.on("click", function(){
+                        btnGroup.remove();
+                        callback(opt);
+                    });
+                    btnGroup.append(btn);
+                });
+                $("#chat-area").append(btnGroup);
+                scrollChatToBottom();
+            }
+
+        
+            function scrollChatToBottom(){
+                let chatArea = $("#chat-area");
+                chatArea.scrollTop(chatArea.prop("scrollHeight"));
+            }
+        
+            // 시간 문자열("08:00")을 시단위 number로 변환
+            function timeStrToNum(t){
+                return parseInt(t.split(":")[0]);
+            }
+        
+            // 한국어 시간 문자열("30분", "1시간", "1시간 30분")을 시간 단위(float)로 변환
+            function parseTimeString(str){
+                if(str === "30분") return 0.5;
+                if(str === "1시간") return 1.0;
+                if(str === "1시간 30분") return 1.5;
+                return 0;
+            }
+        
+            function showPlan(schedule, prepTime, afterTime){
+                appendChatMessage("bot", "아래는 추천 일정표입니다.");
+        
+                // 예: "08:00~17:00"
+                let startHour = timeStrToNum(schedule.split("~")[0]);
+                let endHour = timeStrToNum(schedule.split("~")[1]);
+        
+                let prepDuration = parseTimeString(prepTime);
+                let afterDuration = parseTimeString(afterTime);
+        
+                // 준비 시작 시간 계산: 시작 시간 - prepDuration 시간
+                let prepStart = startHour - prepDuration;
+                // 퇴근/하교 후 귀가 완료 시간: 끝 시간 + afterDuration 시간
+                let afterEnd = endHour + afterDuration;
+        
+                // 테이블을 동적으로 생성
+                // 준비 구간
+                // 시:분 형태로 맞추기 위해 pad 함수 사용
+                function pad(n){return (n<10)?"0"+n:n;}
+                
+                function hourToStr(h){
+                    let hour = Math.floor(h);
+                    let min = (h - hour)*60; 
+                    return pad(hour)+":"+pad(min);
+                }
+        
+                // 일정은 다음과 같이 표시:
+                // [prepStart ~ startHour]: 준비 및 출근/등교
+                // [startHour ~ 12:00]: 주요 업무/수업
+                // [12:00 ~ 13:00]: 점심 식사
+                // [13:00 ~ (endHour-1)]: 오후 업무/수업
+                // [(endHour-1) ~ endHour]: 마무리
+                // [endHour ~ afterEnd]: 귀가(퇴근/하교 후)
+        
+                let planRows = [];
+        
+                // 준비 시간
+                planRows.push({time: hourToStr(prepStart)+" ~ "+hourToStr(startHour), task:"준비 및 출근/등교"});
+        
+                // 오전 업무/수업
+                if(startHour < 12){
+                    planRows.push({time: hourToStr(startHour)+" ~ 12:00", task:"주요 업무/수업"});
+                }
+        
+                // 점심
+                if(endHour > 12) {
+                    planRows.push({time: "12:00 ~ 13:00", task:"점심 식사"});
+                }
+        
+                // 오후 업무/수업
+                if(endHour > 13) {
+                    planRows.push({time: "13:00 ~ "+pad(endHour-1)+":00", task:"오후 업무/수업"});
+                }
+        
+                // 마무리
+                planRows.push({time: (endHour-1)+":00 ~ "+endHour+":00", task:"마무리"});
+        
+                // 퇴근/하교 후
+                planRows.push({time: hourToStr(endHour)+" ~ "+hourToStr(afterEnd), task:"귀가"});
+        
+                let planHTML = `<table class="table table-bordered" style="font-size:14px; margin:10px 0;">
+                        <thead><tr><th>시간</th><th>계획</th></tr></thead>
+                        <tbody>`;
+                planRows.forEach(r=>{
+                    planHTML += `<tr><td>${r.time}</td><td>${r.task}</td></tr>`;
+                });
+                planHTML += `</tbody></table>`;
+        
+                $("#chat-area").append(planHTML);
+                scrollChatToBottom();
+            }
+        
+        });
+        </script>
+        
 			<script src="assets/js/jquery.min.js"></script>
 			<script src="assets/js/jquery.scrollex.min.js"></script>
 			<script src="assets/js/jquery.scrolly.min.js"></script>
